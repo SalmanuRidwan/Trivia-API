@@ -76,7 +76,6 @@ def create_app(test_config=None):
             'success': True,
             'categories': current_categories,
             'questions': current_questions,
-            'current_category': 'Placeholder',
             'total_questions': len(total_questions)
             
         })    
@@ -119,7 +118,6 @@ def create_app(test_config=None):
                 return jsonify({
                     'success': True,
                     'questions': questions,
-                    'current_category': 'Placeholder',
                     'total_questions': total_questions
             })
                 
@@ -153,51 +151,35 @@ def create_app(test_config=None):
             'success': True,
             'questions': questions,
             'total_questions': questions_count,
-            'current_category': 'Placeholder'
         })
 
     @app.route('/quizzes', methods=['POST'])
-    def get_random_question():
+    def quiz_questions():
         body = request.get_json()
-        try:
-            past_questions = body.get('previous_questions', None)
-            quiz_category = body.get('quiz_category', None)
-            category_id = quiz_category['id']
+        prev_questions = body.get('previous_questions', [])
+        category = body['quiz_category']['id']
+        
+        categorized_question = Question.query.all() if category == 0 else Question.query.filter_by(Question.category == category).all()
+        id = [question.id for question in categorized_question]
+        result_id = list(set(id) - set(prev_questions))
+        
+        if result_id == []:
+            question = ''
             
-            if category_id == 0:
-                random_select = Question.query.order_by(func.random())
-                selection = random_select.filter(Question.id.not_in(past_questions)).first()
-                
-                if selection is not None:
-                    question = selection.format()
-                    
-                    return jsonify({
-                        'success': True,
-                        'question': question
-                    })
-                    
-                return jsonify({
-                    'question': None,
-                })
-                
-            else:
-                random_select = Question.query.order_by(func.random())
-                selection = random_select.filter(Question.category == category_id, Question.id.not_in(past_questions)).first()
-                
-                if selection is not None:
-                    question = selection.format()
-                    
-                    return jsonify({
-                        'success': True,
-                        'question': question,
-                    })
-                return jsonify({
-                    'question': None
-                })
-        except BaseException:
-            abort(404)
-    
-    ### ERROR HANDLERS ###
+        else:
+            current_questions = Question.query.filter(Question.id == int(random.choice(result_id))).first()
+            question = {
+                'id': current_questions.id,
+                'question': current_questions.question,
+                'answer': current_questions.answer
+            }
+            
+            return jsonify({
+                'question': question
+            })
+            
+            
+    ### ERROR HANDLERS 400, 404, 405, 422 & 500  ###
     
     @app.errorhandler(400)
     def bad_request(error):
