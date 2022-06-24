@@ -1,4 +1,5 @@
 from functools import total_ordering
+import json
 from multiprocessing.dummy import current_process
 import os
 from sre_parse import CATEGORIES
@@ -23,10 +24,14 @@ def paginate_questions(request, selection):
     return current_questions
 
 def list_categories(selection):
-    categories = [category.format() for category in selection]
-    data = []
+    categories = Category.query.all()
+    data = {}
     for category in categories:
-        data.append(category)
+            first = category.id
+            second = category.type
+            data.update({"".replace("", str(first)): "".replace("", second)})
+            
+    return data
 
 
 def create_app(test_config=None):
@@ -47,22 +52,19 @@ def create_app(test_config=None):
     
     @app.route('/categories', methods=['GET'])
     def get_categories():
-        categories = Category.query.order_by(Category.id).all()
-        current_categories = list_categories(categories)
+        selection = Category.query.order_by(Category.id).all()
+        current_categories = list_categories(selection)
         
-        if int(len(current_categories)) == 0:
-            abort(404)
-               
         return jsonify({
             'success': True,
-            'categories': categories,
+            'categories': current_categories,
         })
     
     @app.route('/questions', methods=['GET'])
     def get_questions():
-        categories = Category.query.order_by(Category.id).all()
+        selection = Category.query.order_by(Category.id).all()
         questions = Question.query.order_by(Question.id).all()
-        current_categories = list_categories(categories)
+        current_categories = list_categories(selection)
         current_questions = paginate_questions(request, questions)
         questions_count = len(current_questions)
         total_questions = Question.query.all()
@@ -212,6 +214,14 @@ def create_app(test_config=None):
             'error': 404,
             'message': "resource not found"
         }), 404
+        
+    @app.errorhandler(405)
+    def method_not_allowed(error):
+        return jsonify({
+            'success': False,
+            'error': 405,
+            'messsage': 'method not allowed'
+        }), 405
 
     @app.errorhandler(422)
     def unprocessable(error):

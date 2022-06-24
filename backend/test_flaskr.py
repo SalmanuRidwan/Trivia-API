@@ -34,18 +34,17 @@ class TriviaTestCase(unittest.TestCase):
         data = json.loads(res.data)
         
         self.assertEqual(res.status_code, 200)
-        self.assertEqual(data['success'], True)
-        self.assertTrue(data['categories'])
-        self.assertTrue(isinstance(data['categories'], dict))
+        self.assertEqual(data.get('success'), True)
+        self.assertTrue(data.get('categories'))
 
-    # def test_get_questions(self):
-    #     res = self.client().get('/questions')
-    #     data = json.loads(res.data)
+    def test_get_questions(self):
+        res = self.client().get('/questions')
+        data = json.loads(res.data)
         
-    #     self.assertEqual(res.status_code, 200)
-    #     self.assertEqual(data['success'], True)
-    #     self.assertEqual(data['total_questions'], 10)
-        
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data.get('total_questions'), 17)
+        self.assertTrue(data.get('questions'))
+        self.assertTrue(data.get('categories'))
 
 # Make the tests conveniently executable
 if __name__ == "__main__":
