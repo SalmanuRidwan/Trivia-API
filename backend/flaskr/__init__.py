@@ -159,7 +159,7 @@ def create_app(test_config=None):
         prev_questions = body.get('previous_questions', [])
         category = body['quiz_category']['id']
         
-        categorized_question = Question.query.all() if category == 0 else Question.query.filter_by(Question.category == category).all()
+        categorized_question = Question.query.all() if category == 0 else Question.query.filter_by(category = category).all()
         id = [question.id for question in categorized_question]
         result_id = list(set(id) - set(prev_questions))
         
@@ -167,15 +167,15 @@ def create_app(test_config=None):
             question = ''
             
         else:
-            current_questions = Question.query.filter(Question.id == int(random.choice(result_id))).first()
+            current_question = Question.query.filter(Question.id == int(random.choice(result_id))).first()
             question = {
-                'id': current_questions.id,
-                'question': current_questions.question,
-                'answer': current_questions.answer
+                'id': current_question.id,
+                'question': current_question.question,
+                'answer': current_question.answer
             }
             
             return jsonify({
-                'question': question
+                'question': question,
             })
             
             
