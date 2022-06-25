@@ -43,10 +43,52 @@ class TriviaTestCase(unittest.TestCase):
         data = json.loads(res.data)
         
         self.assertEqual(res.status_code, 200)
-        self.assertEqual(data.get('total_questions'), 17)
         self.assertTrue(data.get('questions'))
         self.assertTrue(data.get('categories'))
 
+    def test_404_test_on_request_greathan_valid_page(self):
+        res = self.client().get('/questions?page=77')
+        data = json.loads(res.data)
+        
+        self.assertEqual(res.status_code, 404)
+        self.assertEqual(data.get('success'), False)
+        self.assertEqual(data.get('message'), 'resource not found')
+    
+    def test_delete_question(self):
+        question_id = Question.query.first().format()['id']
+        res = self.client().delete(f'/questions/{question_id}')
+        data = json.loads(res.data)
+        question = Question.query.filter_by(id = question_id).one_or_none()
+        
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(question, None)
+        self.assertEqual(data.get('success'), True)    
+        
+    def test_search_question(self):
+        res = self.client().post('/questions', json={'searchTerm': 'Very hungry'})
+        data = json.loads(res.data)
+        term = data.get('questions')
+        
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data.get('success'), True)
+        self.assertEqual(len(term), 0)
+        
+    def test_category_based_question(self):
+        res = self.client().get('/categories/4/questions')
+        data = json.loads(res.data)
+        
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data.get('success'), True)
+
+    def test_get_question(self):
+        res = self.client().post('/quizzes', json={"previous_questions": [], "quiz_category": {"id": 1, "type": "Science"}})
+        data = json.loads(res.data)
+        
+        self.assertEqual(res.status_code, 200)
+        self.assertTrue(isinstance(data.get('question'), dict))
+    
+    
+        
 # Make the tests conveniently executable
 if __name__ == "__main__":
     unittest.main()
