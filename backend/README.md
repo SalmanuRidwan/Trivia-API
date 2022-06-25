@@ -71,25 +71,156 @@ One note before you delve into your tasks: for each endpoint, you are expected t
 
 You will need to provide detailed documentation of your API endpoints including the URL, request parameters, and the response body. Use the example below as a reference.
 
-### Documentation Example
+### Trivia API Documentation
 
-`GET '/api/v1.0/categories'`
+- `GET /categories`
 
-- Fetches a dictionary of categories in which the keys are the ids and the value is the corresponding string of the category
-- Request Arguments: None
-- Returns: An object with a single key, `categories`, that contains an object of `id: category_string` key: value pairs.
+  - Returns an object with a single key **categories**, that contains an object of `id: category_string` key: value pairs.
+  - URI: `http://localhost:5000/categories`
+  - Response :
+ 
+    ```json
+   "categories":   {
+          "1": "Science",
+          "2": "Art",
+          "3": "Geography",
+          "4": "History",
+          "5": "Entertainment",
+          "6": "Sports"
+      }
+    ```
 
-```json
-{
-  "1": "Science",
-  "2": "Art",
-  "3": "Geography",
-  "4": "History",
-  "5": "Entertainment",
-  "6": "Sports"
-}
+- `GET /questions`
+
+  - Returns all the questions with their respective answers, and total number of questions
+  - Questions are paginated by 10
+  - URI: `http://localhost:5000/questions?page=$(id)`
+  - Response:
+
+    ```
+    
+    {
+        "categories":{
+            "1":"Science",
+            "2":"Art",
+            "3":"Geography",
+            "4":"History",
+            "5":"Entertainment",
+            "6":"Sports"
+            },
+        "questions":[
+            {
+            "answer":"Muhammad Ali",
+            "category":4,
+            "difficulty":1,
+            "id":9,
+            "question":"What boxer's original name is Cassius Clay?"
+            },
+            {
+            "answer":"Brazil",
+            "category":6,
+            "difficulty":3,
+            "id":10,
+            "question":"Which is the only team to play in every soccer World Cup tournament?"
+            },
+            {
+            "answer":"Uruguay",
+            "category":6,
+            "difficulty":4,
+            "id":11,
+            "question":"Which country won the first ever soccer World Cup in 1930?"
+            }],
+        "success":true,
+        "total_questions":3}
+    ```
+
+- POST `/questions`
+  
+    - Adds a new value to the object *question*
+    - Returns a success value on successful request
+    - URI: `curl http://localhost:5000/questions -X POST -H "Content-Type: application/json" -d '{"answer": 2, "category": 2, "diffuculty": 1, "question": "A car has how many side mirrors?"}'`
+    - Response:
+    - 
+        ```
+            "success": True,
+        ```
+
+- POST `/search`
+    - Searches for question(s) using partial string matching
+    - Search is Case in-sensitive
+    - URI: `curl http://localhost:5000/questions?search="world"`
+    - Response:
+  
+    ```
+    {
+        "answer":"Brazil",
+        "category":6,
+        "difficulty":3,
+        "id":10,
+        "question":"Which is the only team to play in every soccer World Cup tournament?"
+    },
+    {
+        "answer":"Uruguay",
+        "category":6,
+        "difficulty":4,
+        "id":11,
+        "question":"Which country won the first ever soccer World Cup in 1930?"
+    }
+    ```
+
+- DELETE `/questions/<int:question_id>`
+  - Deletes a specific question based on the id provided
+  - Returns success value *i.e* True, total questions count and the remaining questions available
+  - URI: `curl http://localhost:5000/question/9 -X DELETE -H "Content-Type: application/json"`
+
+> In reference to GET `/questions` above
+
+  - Response:
+
+```
+    
+    {
+        "categories":{
+            "1":"Science",
+            "2":"Art",
+            "3":"Geography",
+            "4":"History",
+            "5":"Entertainment",
+            "6":"Sports"
+            },
+        "questions":[
+            {
+            "answer":"Brazil",
+            "category":6,
+            "difficulty":3,
+            "id":10,
+            "question":"Which is the only team to play in every soccer World Cup tournament?"
+            },
+            {
+            "answer":"Uruguay",
+            "category":6,
+            "difficulty":4,
+            "id":11,
+            "question":"Which country won the first ever soccer World Cup in 1930?"
+            }],
+        "success":true,
+        "total_questions":2}
 ```
 
+
+- POST `/quizzes`
+  - For submitting answers to the questions in the game
+  - On successful request, it returns the question_id, question and answer of a specific question
+  - URI: `curl http://localhost:5000/categories/9/questions -X POST`
+  - Response:
+
+````
+    "answer":"Muhammad Ali",
+    "id":9,
+    "question":"What boxer's original name is Cassius Clay?"
+````
+
+  
 ## Testing
 
 Write at least one test for the success and at least one error behavior of each endpoint using the unittest library.
