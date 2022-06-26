@@ -155,29 +155,34 @@ def create_app(test_config=None):
 
     @app.route('/quizzes', methods=['POST'])
     def quiz_questions():
+        
+            ################  IMPROVED ENDPOINT LOGIC  ##########################
         body = request.get_json()
-        prev_questions = body.get('previous_questions', [])
-        category = body['quiz_category']['id']
+        quiz_category = body.get('quiz_category')
+        previous_questions = body.get('previous_questions')
+        questions = []
+        random_question = None
         
-        categorized_question = Question.query.all() if category == 0 else Question.query.filter_by(category = category).all()
-        id = [question.id for question in categorized_question]
-        result_id = list(set(id) - set(prev_questions))
-        
-        if result_id == []:
-            question = ''
-            
-        else:
-            current_question = Question.query.filter(Question.id == int(random.choice(result_id))).first()
-            question = {
-                'id': current_question.id,
-                'question': current_question.question,
-                'answer': current_question.answer
-            }
-            
+        try:
+            if quiz_category is None or quiz_category['id'] == 0:
+                formatted_questions = [question.format() for question in Question.query.all()]
+            else:
+                formatted_questions = [question.format() for question in Question.query.filter(Question.category == quiz_category['id']).all()]
+                
+            for question in formatted_questions:
+                if question['id'] not in previous_questions:
+                    questions.append(question)
+                    
+            if len(questions) > 0:
+                random_question = random.choice(questions)
+                
             return jsonify({
-                'question': question,
+                'success': True,
+                'question': random_question,
+                'previous_questions': previous_questions
             })
-            
+        except:
+            abort(422)
             
     ### ERROR HANDLERS 400, 404, 405, 422 & 500  ###
     
