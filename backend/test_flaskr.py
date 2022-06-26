@@ -134,7 +134,7 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data.get('success'), True)
         
-    def test_400_on_add_new_questions(self):
+    def test_405_on_add_new_questions(self):
         res = self.client().post('/questions')
         data = json.loads(res.data)
         

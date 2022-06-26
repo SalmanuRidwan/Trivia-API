@@ -122,7 +122,7 @@ COPY public.categories (id, type) FROM stdin;
 --
 -- Data for Name: questions; Type: TABLE DATA; Schema: public; Owner: student
 --
-insert into questions (id, question, answer, difficulty, category) values (9, '', '', 2, 4);
+
 COPY public.questions (id, question, answer, difficulty, category) FROM stdin;
 5	Whose autobiography is entitled 'I Know Why the Caged Bird Sings'?	Maya Angelou	2	4
 9	What boxer's original name is Cassius Clay?	Muhammad Ali	1	4
