@@ -95,7 +95,7 @@ def create_app(test_config=None):
                 'success': True,
             })
         except BaseException:
-            abort(422)
+            abort(404)
 
 
     @app.route('/questions', methods=['POST'])
@@ -134,8 +134,8 @@ def create_app(test_config=None):
                 'success': True,
             })
         
-        except BaseException:
-            abort(400)
+        except:
+            abort(405)
             
 
     @app.route('/categories/<int:category_id>/questions', methods=['GET'])

@@ -86,7 +86,60 @@ class TriviaTestCase(unittest.TestCase):
         
         self.assertEqual(res.status_code, 200)
         self.assertTrue(isinstance(data.get('question'), dict))
+        
+    def test_404_requesting_category(self):
+        res = self.client().get('/categories/4')
+        data = json.loads(res.data)
+        
+        self.assertEqual(res.status_code, 404)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data.get('message'), 'resource not found')
+        
+    def test_404_if_question_does_not_exist(self):
+        res = self.client().delete('/questions/1065')
+        data = json.loads(res.data)
+        
+        self.assertEqual(res.status_code, 404)
+        self.assertEqual(data.get('success'), False)
+        self.assertEqual(data.get('message'), 'resource not found')
+        
+    def test_405_on_search_question(self):
+        res = self.client().get('/questions/98')
+        data = json.loads(res.data)
+        
+        self.assertEqual(res.status_code, 405)
+        self.assertEqual(data.get('success'), False)
+        
+    def test_404_on_unknown_category_question(self):
+        res = self.client().get('/categories/9888884/questions')
+        data = json.loads(res.data)
+        
+        self.assertEqual(res.status_code, 404)
+        self.assertEqual(data.get('success'), False)
+        self.assertEqual(data.get('message'), 'resource not found')
     
+    def test_404_on_getting_question_with_no_input(self):
+        res = self.client().get('/quizzes/3')
+        data = json.loads(res.data)
+        
+        self.assertEqual(res.status_code, 404)
+        self.assertEqual(data.get('success'), False)
+        self.assertEqual(data.get('message'), 'resource not found')
+    
+    
+    def test_create_new_question(self):
+        res = self.client().post('/questions', json={"new_question": "There are how many days in a week?", "new_answer": 7, "new_category": 3, "new_difficulty": 1})
+        data = json.loads(res.data)
+        
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data.get('success'), True)
+        
+    def test_400_on_add_new_questions(self):
+        res = self.client().post('/questions')
+        data = json.loads(res.data)
+        
+        self.assertEqual(res.status_code, 405)
+        self.assertEqual(data.get('success'), False)
     
         
 # Make the tests conveniently executable
